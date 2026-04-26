@@ -1,0 +1,12 @@
+services:
+  mysql:
+    image: mysql:8.0.41
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=aqa_shop
+      - MYSQL_USER=app
+      - MYSQL_PASSWORD=9mREsvXDs9Gk89Ef
