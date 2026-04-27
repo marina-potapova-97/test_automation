@@ -26,6 +26,19 @@ public class SQLHelper {
             return QUERY_RUNNER.query(conn, sql, new ScalarHandler<>());
         }
     }
+    // Метод для очистки всех таблиц БД
+    @SneakyThrows
+    public static void cleanDatabase() {
+        var deleteOrderEntity = "DELETE FROM order_entity";
+        var deletePaymentEntity = "DELETE FROM payment_entity";
+        var deleteCreditRequestEntity = "DELETE FROM credit_request_entity";
+
+        try (var conn = getConn()) {
+            QUERY_RUNNER.update(conn, deleteOrderEntity);
+            QUERY_RUNNER.update(conn, deletePaymentEntity);
+            QUERY_RUNNER.update(conn, deleteCreditRequestEntity);
+        }
+    }
 
 }
 

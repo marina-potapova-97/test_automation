@@ -1,7 +1,10 @@
 package ru.netology.test;
 
+import com.codeborne.selenide.logevents.SelenideLogger;
 import com.github.javafaker.Faker;
+import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.data.DataHelper;
@@ -21,6 +24,14 @@ public class CreditTest {
         open("http://localhost:8080");
     }
 
+    @BeforeAll
+    static void setUpAll(){
+        SelenideLogger.addListener("allure", new AllureSelenide());
+    }
+    @BeforeAll
+    static void setUp() {
+        SQLHelper.cleanDatabase();
+    }
     @Test
     public void TA001_CardNumber_LatinLetters_ShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит

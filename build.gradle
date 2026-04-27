@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version "2.12.0"
 }
 
 group = 'ru.netology'
@@ -28,6 +29,7 @@ dependencies {
         testImplementation 'com.codeborne:selenide:6.18.0'
         testImplementation 'commons-dbutils:commons-dbutils:1.7'
         testImplementation 'mysql:mysql-connector-java:8.0.30'
+        testImplementation 'io.qameta.allure:allure-selenide:2.13.3'
 
     }
 }
