@@ -26,6 +26,7 @@ public class SQLHelper {
             return QUERY_RUNNER.query(conn, sql, new ScalarHandler<>());
         }
     }
+
     // Метод для очистки всех таблиц БД
     @SneakyThrows
     public static void cleanDatabase() {

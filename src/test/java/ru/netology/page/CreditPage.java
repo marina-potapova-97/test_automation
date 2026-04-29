@@ -39,84 +39,84 @@ public class CreditPage {
         cvcInput.setValue(cvc);
         continueButton.click();
     }
+
     public void waitSuccessNotification() {
-        successNotification.shouldBe(visible, Duration.ofSeconds(15));
+        successNotification.shouldBe(visible, Duration.ofSeconds(15))
+                .shouldHave(Condition.text("Операция одобрена банком"));
     }
+
     public void waitErrorNotification() {
-        errorNotification.shouldBe(visible, Duration.ofSeconds(15));
+        errorNotification.shouldBe(visible, Duration.ofSeconds(15))
+                .shouldHave(Condition.text("Ошибка! Банк отказал в проведении операции."));
     }
 
     public void waitInputSubErrorVisible() {
         inputSubTextError.shouldBe(visible);
     }
+
     public void fillCardNumber(String cardNumber) {
         cardNumberInput.clear();
         cardNumberInput.setValue(cardNumber);
     }
+
     // Получить значение поля номера карты
-    public String getCardNumberValue() {
-        return cardNumberInput.getValue();
+    public void cardNumberValue(String expectedValue) {
+        cardNumberInput.shouldHave(Condition.value(expectedValue));
     }
 
-    // Проверить, что поле не принимает больше maxLength символов
-    public void assertCardNumberMaxLength(int maxLength) {
-        String value = cardNumberInput.getValue().replace(" ", "");
-        assertTrue(value.length() <= maxLength);
-    }
-    public void fillMonth(String month) {
+    public void fillMonth(String cardNumber) {
         monthInput.clear();
-        monthInput.setValue(month);
+        monthInput.setValue(cardNumber);
     }
+
     // Получить значение поля Месяц
-    public String getMonthValue() {
-        return monthInput.getValue();
+    public void monthValue(String expectedValue) {
+        monthInput.shouldHave(Condition.value(expectedValue));
     }
-    public void assertMonthMaxLength(int maxLength) {
-        String value = monthInput.getValue().replace(" ", "");
-        assertTrue(value.length() <= maxLength);
-    }
-    public void fillYear(String year) {
+
+    public void fillYear(String cardNumber) {
         yearInput.clear();
-        yearInput.setValue(year);
+        yearInput.setValue(cardNumber);
     }
+
     // Получить значение поля Год
-    public String getYearValue() {
-        return yearInput.getValue();
+    public void yearValue(String expectedValue) {
+        yearInput.shouldHave(Condition.value(expectedValue));
     }
-    public void assertYearMaxLength(int maxLength) {
-        String value = yearInput.getValue().replace(" ", "");
-        assertTrue(value.length() <= maxLength);
-    }
-    public void fillCvc(String cvc) {
+
+    public void fillCvc(String cardNumber) {
         cvcInput.clear();
-        cvcInput.setValue(cvc);
+        cvcInput.setValue(cardNumber);
     }
+
     // Получить значение поля Год
-    public String getCVCValue() {
-        return cvcInput.getValue();
+    public void cvcValue(String expectedValue) {
+        cvcInput.shouldHave(Condition.value(expectedValue));
     }
-    public void assertCVCMaxLength(int maxLength) {
-        String value = cvcInput.getValue().replace(" ", "");
-        assertTrue(value.length() <= maxLength);
-    }
+
     public void clickContinue() {
         continueButton.click();
     }
+
     // МЕТОДЫ ДЛЯ ПОЛУЧЕНИЯ ТЕКСТА ОШИБОК
-    public String getCardNumberErrorText() {
-        return cardNumberError.shouldBe(visible).getText();
+    public void cardNumberErrorText(String expectedText) {
+        cardNumberError.shouldBe(visible).shouldHave(Condition.text(expectedText));
     }
-    public String getMonthErrorText() {
-        return monthError.shouldBe(visible).getText();
+
+    public void monthErrorText(String expectedText) {
+        monthError.shouldBe(visible).shouldHave(Condition.text(expectedText));
     }
-    public String getYearErrorText() {
-        return yearError.shouldBe(visible).getText();
+
+    public void yearErrorText(String expectedText) {
+        yearError.shouldBe(visible).shouldHave(Condition.text(expectedText));
     }
-    public String getOwnerErrorText() {
-        return ownerError.shouldBe(visible).getText();
+
+    public void ownerErrorText(String expectedText) {
+        ownerError.shouldBe(visible).shouldHave(Condition.text(expectedText));
     }
-    public String getCvcErrorText()
-    { return cvcError.shouldBe(visible).getText();
+
+    public void cvcErrorText(String expectedText) {
+        cvcError.shouldBe(visible).shouldHave(Condition.text(expectedText));
     }
 
 

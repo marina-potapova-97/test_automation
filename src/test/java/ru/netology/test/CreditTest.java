@@ -19,21 +19,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreditTest {
     private final Faker faker = new Faker(new Locale("en"));
+
     @BeforeEach
     void setup() {
         open("http://localhost:8080");
     }
 
     @BeforeAll
-    static void setUpAll(){
+    static void setUpAll() {
         SelenideLogger.addListener("allure", new AllureSelenide());
     }
+
     @BeforeAll
     static void setUp() {
         SQLHelper.cleanDatabase();
     }
+
     @Test
-    public void TA001_CardNumber_LatinLetters_ShouldShowEmptyField() {
+    public void cardNumberLatinLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -41,13 +44,13 @@ public class CreditTest {
         var creditPage = new CreditPage();
         // 3. Тестовые данные
         String invalidCardNumber = DataHelper.generateLatinInvalid(16);
-        String actualValue = creditPage.getCardNumberValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        creditPage.fillCardNumber(invalidCardNumber);
+        // 5. Проверка пустого поля
+        creditPage.cardNumberValue("");
     }
+
     @Test
-    public void TA002_CardNumber_CyrillicLetters_ShouldShowEmptyField() {
+    public void cardNumberCyrillicLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -55,13 +58,13 @@ public class CreditTest {
         var creditPage = new CreditPage();
         // 3. Тестовые данные
         String invalidCardNumber = DataHelper.generateCyrillicInvalid(16);
-        String actualValue = creditPage.getCardNumberValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        creditPage.fillCardNumber(invalidCardNumber);
+        // 5. Проверка пустого поля
+        creditPage.cardNumberValue("");
     }
+
     @Test
-    public void TA003_CardNumber_SpecialCharacter_ShouldShowEmptyField() {
+    public void cardNumberSpecialCharacterShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -69,13 +72,13 @@ public class CreditTest {
         var creditPage = new CreditPage();
         // 3. Тестовые данные
         String invalidCardNumber = String.valueOf(DataHelper.generateSpecialChars(16));
-        String actualValue = creditPage.getCardNumberValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        creditPage.fillCardNumber(invalidCardNumber);
+        // 5. Проверка пустого поля
+        creditPage.cardNumberValue("");
     }
+
     @Test
-    public void TA004_CardNumber_15Character_ShouldShowError() {
+    public void cardNumber15CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -88,11 +91,11 @@ public class CreditTest {
         var owner = DataHelper.generateName("en");
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(invalidCardNumber, month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getCardNumberErrorText());
+        creditPage.cardNumberErrorText("Неверный формат");
     }
+
     @Test
-    public void TA005_CardNumber_17Character_ShouldShow16() {
+    public void cardNumber17CharacterShouldShow16() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -100,15 +103,18 @@ public class CreditTest {
         var creditPage = new CreditPage();
         // 3. Тестовые данные (генерируем 17 цифр)
         String seventeenDigits = DataHelper.generateDigits(17);
+        // Ожидаем, что в поле останутся только первые 16 цифр
+        String expectedValue = seventeenDigits.substring(0, 16);
+        // Форматируем их с пробелами (каждые 4 цифры)
+        String expectedValueWithSpaces = expectedValue.replaceAll("(.{4})", "$1 ").trim();
+        // 4. Вводим 17 цифр
         creditPage.fillCardNumber(seventeenDigits);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getCardNumberValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (16)
-        assertEquals(16, actualLength);
+        // 5. Проверяем значение поля.
+        creditPage.cardNumberValue(expectedValueWithSpaces);
     }
+
     @Test
-    public void TA006_CardNumber_0Character_ShouldShowError() {
+    public void cardNumber0CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -121,12 +127,11 @@ public class CreditTest {
         var owner = DataHelper.generateName("ru");
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(invalidCardNumber, month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getCardNumberErrorText());
+        creditPage.cardNumberErrorText("Неверный формат");
     }
 
     @Test
-    public void TA007_Month_LatinLetters_ShouldShowEmptyField() {
+    public void monthLatinLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -135,14 +140,12 @@ public class CreditTest {
         // 3. Тестовые данные
         String month = DataHelper.generateLatinInvalid(2);
         creditPage.fillMonth(month);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getMonthValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (16)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.monthValue("");
     }
+
     @Test
-    public void TA008_Month_CyrillicLetters_ShouldShowEmptyField() {
+    public void monthCyrillicLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -151,14 +154,12 @@ public class CreditTest {
         // 3. Тестовые данные
         String month = DataHelper.generateCyrillicInvalid(2);
         creditPage.fillMonth(month);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getMonthValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (16)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.monthValue("");
     }
+
     @Test
-    public void TA009_Month_SpecialCharacter_ShouldShowEmptyField() {
+    public void monthSpecialCharacterShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -167,14 +168,12 @@ public class CreditTest {
         // 3. Тестовые данные
         String month = DataHelper.generateSpecialChars(2);
         creditPage.fillMonth(month);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getMonthValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (16)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.monthValue("");
     }
+
     @Test
-    public void TA0010_Month_1Character_ShouldShowError() {
+    public void month1CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -187,11 +186,11 @@ public class CreditTest {
         var owner = DataHelper.generateName("ru");
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getMonthErrorText());
+        creditPage.monthErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0011_Month_0Character_ShouldShowError() {
+    public void month0CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -204,27 +203,28 @@ public class CreditTest {
         var owner = DataHelper.generateName("ru");
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getMonthErrorText());
+        creditPage.monthErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0012_Month_3Character_ShouldShow2() {
+    public void month3CharacterShouldShow2() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
         // 2. Инициализировать страницу кредита
         var creditPage = new CreditPage();
         // 3. Тестовые данные (генерируем 3 цифры)
-        String threeDigits = DataHelper.generateDigits(3);
-        creditPage.fillMonth(threeDigits);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getMonthValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (2)
-        assertEquals(2, actualLength);
+        String month = DataHelper.generateDigits(3);
+        // Ожидаем, что в поле останутся только первые 2 цифры
+        String expectedValue = month.substring(0, 2);
+        // 4. Вводим 3 цифры
+        creditPage.fillMonth(month);
+        // 5. Проверяем значение поля.
+        creditPage.monthValue(expectedValue);
     }
+
     @Test
-    public void TA0013_Year_LatinLetters_ShouldShowEmptyField() {
+    public void yearLatinLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -233,14 +233,12 @@ public class CreditTest {
         // 3. Тестовые данные
         String year = DataHelper.generateLatinInvalid(2);
         creditPage.fillYear(year);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getYearValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.yearValue("");
     }
+
     @Test
-    public void TA0014_Year_CyrillicLetters_ShouldShowEmptyField() {
+    public void yearCyrillicLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -249,14 +247,12 @@ public class CreditTest {
         // 3. Тестовые данные
         String year = DataHelper.generateCyrillicInvalid(2);
         creditPage.fillYear(year);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getYearValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.yearValue("");
     }
+
     @Test
-    public void TA0015_Year_SpecialCharacter_ShouldShowEmptyField() {
+    public void yearSpecialCharacterShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -265,14 +261,12 @@ public class CreditTest {
         // 3. Тестовые данные
         String year = DataHelper.generateSpecialChars(2);
         creditPage.fillYear(year);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getYearValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.yearValue("");
     }
+
     @Test
-    public void TA0016_Year_1Character_ShouldShowError() {
+    public void year1CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -281,15 +275,15 @@ public class CreditTest {
         // 3. Тестовые данные
         var cardInfo = DataHelper.getNumberCardApproved();
         var month = String.format("%02d", DataHelper.generateMonth(faker));
-        String year= DataHelper.generateDigits(1);
+        String year = DataHelper.generateDigits(1);
         var owner = DataHelper.generateName("en");
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getYearErrorText());
+        creditPage.yearErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0017_Year_0Character_ShouldShowError() {
+    public void year0CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -298,16 +292,16 @@ public class CreditTest {
         // 3. Тестовые данные
         var cardInfo = DataHelper.getNumberCardApproved();
         var month = String.format("%02d", DataHelper.generateMonth(faker));
-        String year= DataHelper.generateDigits(0);
+        String year = DataHelper.generateDigits(0);
         creditPage.fillYear(year);
         var owner = DataHelper.generateName("en");
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getYearErrorText());
+        creditPage.yearErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0018_Year_3Characters_ShouldShow2() {
+    public void year3CharactersShouldShow2() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -315,15 +309,16 @@ public class CreditTest {
         var creditPage = new CreditPage();
         // 3. Тестовые данные
         String threeDigits = DataHelper.generateDigits(3);
+        // 4. Ожидаем, что в поле останутся только первые 2 цифры
+        String expectedValue = threeDigits.substring(0, 2);
+        // 5. Вводим 3 цифры
         creditPage.fillYear(threeDigits);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getYearValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (2)
-        assertEquals(2, actualLength);
+        // 5. Проверяем значение поля.
+        creditPage.yearValue(expectedValue);
     }
+
     @Test
-    public void TA019_Owner_LatinLetters_ShouldShowSuccess(){
+    public void ownerLatinLettersShouldShowSuccess() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -342,8 +337,9 @@ public class CreditTest {
         // 4. Проверка результата
         creditPage.waitSuccessNotification();
     }
+
     @Test
-    public void TA020_Owner_CyrillicLetters_ShouldShowSuccess(){
+    public void ownerCyrillicLettersShouldShowSuccess() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -362,8 +358,9 @@ public class CreditTest {
         // 4. Проверка результата
         creditPage.waitSuccessNotification();
     }
+
     @Test
-    public void TA021_Owner_CyrillicLettersWithYo_ShouldShowSuccess(){
+    public void ownerCyrillicLettersWithYoShouldShowSuccess() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -382,8 +379,9 @@ public class CreditTest {
         // 4. Проверка результата
         creditPage.waitSuccessNotification();
     }
+
     @Test
-    public void TA022_Owner_CyrillicLettersWithI_ShouldShowSuccess(){
+    public void ownerCyrillicLettersWithIShouldShowSuccess() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -402,8 +400,9 @@ public class CreditTest {
         // 4. Проверка результата
         creditPage.waitSuccessNotification();
     }
+
     @Test
-    public void TA023_Owner_CyrillicLettersWithDash_ShouldShowSuccess(){
+    public void ownerCyrillicLettersWithDashShouldShowSuccess() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -422,8 +421,9 @@ public class CreditTest {
         // 4. Проверка результата
         creditPage.waitSuccessNotification();
     }
+
     @Test
-    public void TA0024_Owner_SpecialCharacter_ShouldShowError() {
+    public void ownerSpecialCharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -436,11 +436,11 @@ public class CreditTest {
         String owner = DataHelper.generateSpecialChars(10);
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getOwnerErrorText());
+        creditPage.ownerErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0025_Owner_Numbers_ShouldShowError() {
+    public void ownerNumbersShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -453,11 +453,11 @@ public class CreditTest {
         String owner = DataHelper.generateDigits(10);
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getOwnerErrorText());
+        creditPage.ownerErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0026_Owner_0Character_ShouldShowError() {
+    public void owner0CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -467,14 +467,14 @@ public class CreditTest {
         var cardInfo = DataHelper.getNumberCardApproved();
         var month = String.format("%02d", DataHelper.generateMonth(faker));
         var year = DataHelper.generateDate(1, "yy");
-        String owner= DataHelper.generateLatinInvalid(0);
+        String owner = DataHelper.generateLatinInvalid(0);
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Поле обязательно для заполнения", creditPage.getOwnerErrorText());
+        creditPage.ownerErrorText("Поле обязательно для заполнения");
     }
+
     @Test
-    public void TA0027_Owner_1Character_ShouldShowError() {
+    public void owner1CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -484,61 +484,56 @@ public class CreditTest {
         var cardInfo = DataHelper.getNumberCardApproved();
         var month = String.format("%02d", DataHelper.generateMonth(faker));
         var year = DataHelper.generateDate(1, "yy");
-        String owner= DataHelper.generateLatinInvalid(1);
+        String owner = DataHelper.generateLatinInvalid(1);
         var cvc = DataHelper.generateCodeCVC(faker);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
         creditPage.waitSuccessNotification();
     }
+
     @Test
-    public void TA028_CVC_LatinLetters_ShouldShowEmptyField(){
+    public void cvcLatinLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
         // 2. Инициализировать страницу кредита
         var creditPage = new CreditPage();
         // 3. Тестовые данные
-        String cvc = DataHelper.generateLatinInvalid(3);
+        String cvc = DataHelper.generateLatinInvalid(2);
         creditPage.fillCvc(cvc);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getCVCValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.cvcValue("");
     }
+
     @Test
-    public void TA029_CVC_CyrillicLetters_ShouldShowEmptyField(){
+    public void cvcCyrillicLettersShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
         // 2. Инициализировать страницу кредита
         var creditPage = new CreditPage();
         // 3. Тестовые данные
-        String cvc = DataHelper.generateCyrillicInvalid(3);
+        String cvc = DataHelper.generateCyrillicInvalid(2);
         creditPage.fillCvc(cvc);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getCVCValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.cvcValue("");
     }
+
     @Test
-    public void TA030_CVC_SpecialCharacter_ShouldShowEmptyField(){
+    public void cvcSpecialCharacterShouldShowEmptyField() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
         // 2. Инициализировать страницу кредита
         var creditPage = new CreditPage();
         // 3. Тестовые данные
-        String cvc = DataHelper.generateSpecialChars(3);
+        String cvc = DataHelper.generateSpecialChars(2);
         creditPage.fillCvc(cvc);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getCVCValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(0, actualLength);
+        // 4. Проверка пустого поля
+        creditPage.cvcValue("");
     }
+
     @Test
-    public void TA0031_CVC_0Character_ShouldShowError() {
+    public void cvc0CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -551,11 +546,12 @@ public class CreditTest {
         var owner = DataHelper.generateName("ru");
         String cvc = DataHelper.generateDigits(0);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getCvcErrorText());
+        creditPage.cvcErrorText("Неверный формат");
+        ;
     }
+
     @Test
-    public void TA0032_CVC_1Character_ShouldShowError() {
+    public void cvc1CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -568,11 +564,11 @@ public class CreditTest {
         var owner = DataHelper.generateName("ru");
         String cvc = DataHelper.generateDigits(1);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getCvcErrorText());
+        creditPage.cvcErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0033_CVC_2Character_ShouldShowError() {
+    public void cvc2CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -585,28 +581,28 @@ public class CreditTest {
         var owner = DataHelper.generateName("ru");
         String cvc = DataHelper.generateDigits(2);
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getCvcErrorText());
+        creditPage.cvcErrorText("Неверный формат");
     }
+
     @Test
-    public void TA0034_CVC_4Character_ShouldShowError() {
+    public void cvc4CharacterShouldShowError() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
         // 2. Инициализировать страницу кредита
         var creditPage = new CreditPage();
         // 3. Тестовые данные
-        String cvc = DataHelper.generateDigits(4);
-        creditPage.fillCvc(cvc);
-        // 4. Получаем значение, удаляем пробелы и считаем длину
-        String actualValue = creditPage.getCVCValue();
-        int actualLength = actualValue.replace(" ", "").length();
-        // 5. Сравниваем длину с ожидаемой (0)
-        assertEquals(3, actualLength);
+        String forDigits = DataHelper.generateDigits(4);
+        // 4. Ожидаем, что в поле останутся только первые 3 цифры
+        String expectedValue = forDigits.substring(0, 3);
+        // 5. Вводим 4 цифры
+        creditPage.fillCvc(forDigits);
+        // 5. Проверяем значение поля.
+        creditPage.cvcValue(expectedValue);
     }
 
     @Test
-    public void TA035_FillingInAllFields_WithValidData(){
+    public void fillingInAllFieldsWithValidData() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -626,26 +622,27 @@ public class CreditTest {
         // Проверка результата
         creditPage.waitSuccessNotification();
     }
-    @Test
-    public void TA036_SubmittingForm_WithEmptyFields() {
-        var titlePage = new TitlePage();
-        titlePage.TransitionToCredit(); // Переходим на страницу кредита
 
+    @Test
+    public void submittingFormWithEmptyFields() {
+        var titlePage = new TitlePage();
+        titlePage.TransitionToCredit();
+        // Переходим на страницу кредита
         var creditPage = new CreditPage();
 
         // Нажать на кнопку "Продолжить"
         creditPage.clickContinue();
 
         // 4. Проверить ошибки под всеми полями
-        creditPage.waitInputSubErrorVisible();
-        assertEquals("Неверный формат", creditPage.getCardNumberErrorText());
-        assertEquals("Неверный формат", creditPage.getMonthErrorText());
-        assertEquals("Неверный формат", creditPage.getYearErrorText());
-        assertEquals("Поле обязательно для заполнения", creditPage.getOwnerErrorText());
-        assertEquals("Неверный формат", creditPage.getCvcErrorText());
+        creditPage.cardNumberErrorText("Неверный формат");
+        creditPage.monthErrorText("Неверный формат");
+        creditPage.yearErrorText("Неверный формат");
+        creditPage.ownerErrorText("Поле обязательно для заполнения");
+        creditPage.cvcErrorText("Неверный формат");
     }
+
     @Test
-    public void TA037_SubmittingForm_WithDeclinedCardNumber(){
+    public void submittingFormWithDeclinedCardNumber() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -665,8 +662,9 @@ public class CreditTest {
         // Проверка результата
         creditPage.waitErrorNotification();
     }
+
     @Test
-    public void TA038_SubmittingForm_WithInvalidCardNumber(){
+    public void submittingFormWithInvalidCardNumber() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -686,8 +684,9 @@ public class CreditTest {
         // Проверка результата
         creditPage.waitErrorNotification();
     }
+
     @Test
-    public void TA039_SubmittingForm_WithInvalidMonth(){
+    public void submittingFormWithInvalidMonth() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -705,10 +704,11 @@ public class CreditTest {
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
 
         // Проверка результата
-        assertEquals("Неверно указан срок действия карты", creditPage.getMonthErrorText());
+        creditPage.monthErrorText("Неверно указан срок действия карты");
     }
+
     @Test
-    public void TA040_SubmittingForm_WithInvalidYear(){
+    public void submittingFormWithInvalidYear() {
         // 1. Перейти на страницу покупки в кредит
         var titlePage = new TitlePage();
         titlePage.TransitionToCredit();
@@ -719,14 +719,14 @@ public class CreditTest {
         // 3. Подготовка данных через DataHelper
         var cardInfo = DataHelper.getNumberCardApproved();
         var month = String.format("%02d", DataHelper.generateMonth(faker));
-        String year= "24";
+        String year = "24";
         var owner = DataHelper.generateName("en");
         var cvc = DataHelper.generateCodeCVC(faker);
 
         creditPage.fillForm(cardInfo.getNumberCard(), month, year, owner, cvc);
 
         // Проверка результата
-        assertEquals("Истёк срок действия карты", creditPage.getYearErrorText());
+        creditPage.yearErrorText("Истёк срок действия карты");
     }
-    }
+}
 

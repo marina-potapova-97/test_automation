@@ -19,12 +19,12 @@ public class DataHelper {
     private static final Random RANDOM = new Random();
     private static final String SPECIAL_CHARS = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`+";
 
-    public static NumberCardApproved getNumberCardApproved() {
-        return new NumberCardApproved("1111 2222 3333 4444");
+    public static numberCardApproved getNumberCardApproved() {
+        return new numberCardApproved("1111 2222 3333 4444");
     }
 
-    public static NumberCardDeclined getNumberCardDeclined() {
-        return new NumberCardDeclined("5555 6666 7777 8888");
+    public static numberCardDeclined getNumberCardDeclined() {
+        return new numberCardDeclined("5555 6666 7777 8888");
     }
 
     //Генератор случайных значений на латинице
@@ -42,9 +42,10 @@ public class DataHelper {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
             sb.append(SPECIAL_CHARS.charAt(RANDOM.nextInt(SPECIAL_CHARS.length())));
-    }
+        }
         return sb.toString();
     }
+
     public static String generateDigits(int length) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
@@ -72,14 +73,15 @@ public class DataHelper {
     }
 
     @Value
-    public static class NumberCardApproved {
+    public static class numberCardApproved {
         String numberCard;
     }
 
     @Value
-    public static class NumberCardDeclined {
+    public static class numberCardDeclined {
         String numberCard;
     }
+
     @Data
     @NoArgsConstructor
     public class PaymentEntity {
